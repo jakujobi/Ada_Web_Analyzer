@@ -192,10 +192,8 @@ class Definitions:
             # NUM: Matches an integer (one or more digits).
             "NUM": re.compile(r"\d+"),
             
-            # ID: Matches an identifier.
-            # In Ada, an identifier must start with a letter, followed by any number of letters, digits, or underscores.
-            # Note: We no longer limit the match length in the regex; instead, the length is checked in the token processor.
-            "ID": re.compile(r"[a-zA-Z][a-zA-Z0-9_]*"),
+            # ID: Matches an identifier, case insensitive
+            "ID": re.compile(r"(?i)[a-zA-Z][a-zA-Z0-9_]*"),
             
             # ASSIGN: Matches the assignment operator, which in Ada is ':='.
             "ASSIGN": re.compile(r":="),
@@ -233,7 +231,7 @@ class Definitions:
 
     def is_reserved(self, word: str) -> bool:
         """
-        Check if a given word is a reserved word in Ada.
+        Check if a given word is a reserved word in Ada (case insensitive).
 
         Parameters
         ----------
@@ -243,13 +241,13 @@ class Definitions:
         Returns
         -------
         bool
-            True if the word (in uppercase) is in the reserved words dictionary, False otherwise.
+            True if the word is in the reserved words dictionary (case insensitive), False otherwise.
         """
         return word.upper() in self.reserved_words
 
     def get_reserved_token(self, word: str) -> Optional[Enum]:
         """
-        Retrieve the token type for a reserved word.
+        Retrieve the token type for a reserved word (case insensitive).
 
         Parameters
         ----------
@@ -266,7 +264,7 @@ class Definitions:
 
     def get_token_type(self, token_type_str: str) -> Optional[Enum]:
         """
-        Retrieve the token type from the TokenType enumeration based on a given string.
+        Retrieve the token type from the TokenType enumeration based on a given string (case insensitive).
 
         Parameters
         ----------
@@ -278,7 +276,7 @@ class Definitions:
         Optional[Enum]
             The corresponding token type from the TokenType enumeration if it exists; otherwise, None.
         """
-        return getattr(self.TokenType, token_type_str, None)
+        return getattr(self.TokenType, token_type_str.upper(), None)
 
 ###############################################################################
 # Full Documentation for Definitions Class
