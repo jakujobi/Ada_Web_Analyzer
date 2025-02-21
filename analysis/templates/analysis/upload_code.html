@@ -14,6 +14,14 @@
     <!-- Your custom CSS -->
     <link rel="stylesheet" href="{% static 'analysis/css/style.css' %}" />
     <style>
+        body {
+            background-color: #F4F7FA; /* light gray */
+            color: #333;
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            border-color: #0087F7;
+        }
         #drop-zone {
             width: 100%;
             padding: 50px;
@@ -22,25 +30,37 @@
             text-align: center;
             color: #555;
             margin-bottom: 20px;
+            background-color: #E8F0FE;
         }
         #drop-zone.hover {
-            border-color: #333;
-            background-color: #f8f8f8;
+            border-color: #005bb5;
+            background-color: #D0E3FB;
         }
         #file-preview {
             margin-top: 20px;
             padding: 15px;
-            border: 1px solid #ddd;
-            background-color: #fefefe;
+            border: 1px solid #0087F7;
+            background-color: #FFFFFF;
             white-space: pre-wrap;
             word-wrap: break-word;
         }
-        .copy-btn { margin-left: 5px; }
-        #confirmation { margin-top: 15px; }
-        #live-logs { max-height: 300px; overflow-y: auto; }
+        /* Results styling */
+        .tab-pane pre {
+            background-color: #E8F0FE;
+            border: 1px solid #0087F7;
+            color: #333;
+        }
+        .btn-copy, .btn-download {
+            margin-right: 5px;
+        }
+        #confirmation {
+            margin: 10px 0;
+            font-weight: bold;
+            color: #005bb5;
+        }
     </style>
 </head>
-<body class="bg-light">
+<body>
     <div class="container py-4">
         <h1 class="mb-4 text-center">Ada Web Analyzer</h1>
 
@@ -87,7 +107,7 @@
         </div>
 
         <!-- Confirmation Message -->
-        <div id="confirmation" class="alert d-none" role="alert"></div>
+        <div id="confirmation" class="text-center"></div>
 
         <!-- Results Section -->
         <div id="resultsSection" class="d-none">
@@ -153,11 +173,11 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-                <div>
-                    <button class="btn btn-outline-primary btn-sm" id="downloadTokensBtn">
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-sm btn-download" id="downloadTokensBtn">
                         Download Tokens
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm copy-btn" id="copyTokensBtn">Copy Tokens</button>
+                    <button class="btn btn-outline-primary btn-sm btn-copy" id="copyTokensBtn">Copy Tokens</button>
                 </div>
             </div>
 
@@ -170,11 +190,11 @@
             >
                 <h5>Parse Tree</h5>
                 <pre id="parseTree" class="bg-white p-2"></pre>
-                <div>
-                    <button class="btn btn-outline-primary btn-sm" id="downloadParseTreeBtn">
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-sm btn-download" id="downloadParseTreeBtn">
                         Download Parse Tree
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm copy-btn" id="copyParseTreeBtn">Copy Parse Tree</button>
+                    <button class="btn btn-outline-primary btn-sm btn-copy" id="copyParseTreeBtn">Copy Parse Tree</button>
                 </div>
             </div>
 
@@ -183,6 +203,21 @@
             class="tab-pane fade"
             id="logsTabContent"
             role="tabpanel"
+            aria-labelledby="logs-tab"
+            >
+                <h5>Logs / Errors</h5>
+                <pre id="logs" class="bg-white p-2"></pre>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-sm btn-download" id="downloadLogsBtn">
+                        Download Logs
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm btn-copy" id="copyLogsBtn">Copy Logs</button>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS (via CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Your custom JS -->
@@ -227,9 +262,9 @@
             filePreview.classList.add('d-none');
             filePreview.textContent = "";
             try {
-                // if (!file.type.endsWith(".ada")) {
-                //     throw new Error("Invalid file type. Please drop a .ada file.");
-                // }
+                if (!file.name.endsWith(".ada")) {
+                    throw new Error("Invalid file type. Please select a .ada file.");
+                }
                 let reader = new FileReader();
                 reader.onload = function(e) {
                     const content = e.target.result;
@@ -247,6 +282,67 @@
                 filePreview.classList.remove('d-none');
             }
         }
+
+        // Functions for Copy and Download
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Text copied to clipboard!");
+            }).catch(() => {
+                alert("Failed to copy text.");
+            });
+        }
+
+        function downloadText(elementId, filename) {
+            const text = document.getElementById(elementId).innerText;
+            const blob = new Blob([text], {type: "text/plain"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        document.getElementById("copyTokensBtn").addEventListener("click", function() {
+            copyText("tokensTable");
+        });
+        document.getElementById("downloadTokensBtn").addEventListener("click", function() {
+            downloadText("tokensTable", "tokens.txt");
+        });
+        document.getElementById("copyParseTreeBtn").addEventListener("click", function() {
+            copyText("parseTree");
+        });
+        document.getElementById("downloadParseTreeBtn").addEventListener("click", function() {
+            downloadText("parseTree", "parsetree.txt");
+        });
+        document.getElementById("copyLogsBtn").addEventListener("click", function() {
+            copyText("logs");
+        });
+        document.getElementById("downloadLogsBtn").addEventListener("click", function() {
+            downloadText("logs", "logs.txt");
+        });
+
+        // Simulated live Log refresh
+        function updateLogs() {
+            // In a real application, replace this with an AJAX call to fetch new logs.
+            const logPre = document.getElementById("logs");
+            const timestamp = new Date().toLocaleTimeString();
+            logPre.textContent += `[${timestamp}] Live log update...\n`;
+        }
+        setInterval(updateLogs, 5000);
+
+        // Simulated confirmation message on analysis completion
+        // In your actual analysis AJAX success callback, set confirmation text accordingly.
+        // For demo, we set a timeout.
+        setTimeout(() => {
+            // Assume analysis was successful if logs indicate no errors.
+            const logsContent = document.getElementById("logs").innerText;
+            const message = logsContent.includes("error") ? "Analysis completed with errors." : "Analysis successful. No errors found.";
+            document.getElementById("confirmation").textContent = message;
+            document.getElementById("resultsSection").classList.remove("d-none");
+        }, 2000);
     </script>
 </body>
 </html>
