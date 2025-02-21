@@ -1,0 +1,12 @@
+body {
+background-color: #f8f9fa;
+}
+
+pre {
+white-space: pre-wrap; /* Wrap long lines */
+word-wrap: break-word;
+}
+
+#resultsSection {
+margin-top: 20px;
+}
