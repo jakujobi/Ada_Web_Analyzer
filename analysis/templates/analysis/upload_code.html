@@ -35,6 +35,9 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+        .copy-btn { margin-left: 5px; }
+        #confirmation { margin-top: 15px; }
+        #live-logs { max-height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body class="bg-light">
@@ -82,6 +85,9 @@
             </div>
         </div>
         </div>
+
+        <!-- Confirmation Message -->
+        <div id="confirmation" class="alert d-none" role="alert"></div>
 
         <!-- Results Section -->
         <div id="resultsSection" class="d-none">
@@ -147,9 +153,12 @@
                     </thead>
                     <tbody></tbody>
                 </table>
-                <button class="btn btn-outline-primary btn-sm" id="downloadTokensBtn">
-                    Download Tokens
-                </button>
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" id="downloadTokensBtn">
+                        Download Tokens
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm copy-btn" id="copyTokensBtn">Copy Tokens</button>
+                </div>
             </div>
 
             <!-- Parse Tree Tab -->
@@ -161,9 +170,12 @@
             >
                 <h5>Parse Tree</h5>
                 <pre id="parseTree" class="bg-white p-2"></pre>
-                <button class="btn btn-outline-primary btn-sm" id="downloadParseTreeBtn">
-                    Download Parse Tree
-                </button>
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" id="downloadParseTreeBtn">
+                        Download Parse Tree
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm copy-btn" id="copyParseTreeBtn">Copy Parse Tree</button>
+                </div>
             </div>
 
             <!-- Logs Tab -->
@@ -171,18 +183,6 @@
             class="tab-pane fade"
             id="logsTabContent"
             role="tabpanel"
-            aria-labelledby="logs-tab"
-            >
-            <h5>Logs / Errors</h5>
-            <pre id="logs" class="bg-white p-2"></pre>
-            <button class="btn btn-outline-primary btn-sm" id="downloadLogsBtn">
-                Download Logs
-            </button>
-            </div>
-        </div>
-        </div>
-    </div>
-
     <!-- Bootstrap JS (via CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Your custom JS -->
