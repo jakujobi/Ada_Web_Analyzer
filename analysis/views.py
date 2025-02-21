@@ -54,15 +54,21 @@ def process_code_view(request):
         'success': success,
     })
 
-def generate_parse_tree_text(node, indent_level=0):
+def generate_parse_tree_text(node, prefix="", is_last=True):
     """
-    A helper function to build a string representation of the parse tree.
+    Generates a string representation of the parse tree using Unicode connectors.
     """
-    indent = "   " * indent_level
-    node_str = f"{indent}{node.name}"
+    connector = "└──" if is_last else "├──"
+    line = f"{prefix}{connector} {node.name}"
     if node.token:
-        node_str += f" ({node.token.lexeme})"
-    result = node_str + "\n"
-    for child in node.children:
-        result += generate_parse_tree_text(child, indent_level + 1)
-    return result
+        line += f" ({node.token.lexeme})"
+    line += "\n"
+
+    new_prefix = prefix + ("    " if is_last else "│   ")
+
+    child_count = len(node.children)
+    for i, child in enumerate(node.children):
+        line += generate_parse_tree_text(child, new_prefix, i == (child_count - 1))
+
+    return line
+
