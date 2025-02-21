@@ -19,16 +19,25 @@ def process_code_view(request):
     Receives code (via uploaded file or pasted text), runs lexical + syntax analysis,
     and returns JSON containing tokens, parse tree, and errors/logs.
     """
-    source_code = ""
-
-    # 1. Check if user uploaded a file
-    uploaded_file = request.FILES.get('ada_file')
-    if uploaded_file:
-        source_code = uploaded_file.read().decode('utf-8')
-
-    # 2. Or check if user pasted code
+    # Get code from the pasted text box
+    source_code = request.POST.get('ada_code', '').strip()
+    print(f"Received code from text box: {source_code[:100]}...")  # Debug log
+    
+    # If no code in text box, try uploaded file
     if not source_code:
-        source_code = request.POST.get('ada_code', '')
+        uploaded_file = request.FILES.get('ada_file')
+        if uploaded_file:
+            source_code = uploaded_file.read().decode('utf-8')
+            print(f"Received code from file: {source_code[:100]}...")  # Debug log
+
+    # If no code is provided, return an error.
+    if not source_code:
+        return JsonResponse({
+            'tokens': [],
+            'parse_tree': '',
+            'errors': ["No code provided."],
+            'success': False,
+        })
 
     # 3. Run Lexical Analysis
     lexer = LexicalAnalyzer(stop_on_error=False)

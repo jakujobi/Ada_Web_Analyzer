@@ -11,6 +11,8 @@
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     />
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css" />
     <!-- Your custom CSS -->
     <link rel="stylesheet" href="{% static 'analysis/css/style.css' %}" />
     <style>
@@ -58,6 +60,13 @@
             margin: 10px 0;
             font-weight: bold;
             color: #005bb5;
+        }
+        /* Parse Tree container for D3 visualization */
+        #parseTreeViz {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #0087F7;
+            background-color: #E8F0FE;
         }
     </style>
 </head>
@@ -136,18 +145,9 @@
             <div class="card-body">
                 <form id="codeForm">
                 {% csrf_token %}
-                <div class="mb-3">
-                    <textarea
-                    class="form-control"
-                    name="ada_code"
-                    rows="8"
-                    placeholder="Paste Ada code here..."
-                    required
-                    ></textarea>
-                </div>
-                <button type="submit" class="btn btn-outline-primary w-100">
-                    Analyze Code
-                </button>
+                <!-- Code Editor Container -->
+                <div id="codeEditor" style="height: 300px; border: 1px solid #ddd;"></div>
+                <button type="submit" class="btn btn-success w-100 mt-3">Analyze Code</button>
                 </form>
             </div>
             </div>
@@ -237,7 +237,8 @@
             aria-labelledby="parseTree-tab"
             >
                 <h5>Parse Tree</h5>
-                <pre id="parseTree" class="bg-white p-2"></pre>
+                <!-- New interactive visualization container -->
+                <div id="parseTreeViz"></div>
                 <div class="d-flex justify-content-end">
                     <button class="btn btn-outline-primary btn-sm btn-download" id="downloadParseTreeBtn">
                         Download Parse Tree
@@ -287,6 +288,11 @@
 
     <!-- Bootstrap JS (via CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <!-- D3.js (for interactive parse tree) -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Your custom JS -->
     <script src="{% static 'analysis/js/main.js' %}"></script>
     <script>
@@ -410,6 +416,31 @@
             document.getElementById("confirmation").textContent = message;
             document.getElementById("resultsSection").classList.remove("d-none");
         }, 2000);
+
+        // Initialize CodeMirror on the code editor container
+        const codeEditor = CodeMirror(document.getElementById("codeEditor"), {
+            lineNumbers: true,
+            mode: "text/x-csrc", // Ada doesn't have a built-in mode, so using C-like highlighting
+            theme: "default"
+        });
+
+        // When the codeForm is submitted, send the content from CodeMirror
+        document.getElementById("codeForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            // Create a hidden textarea to include the CodeMirror content
+            let codeContent = codeEditor.getValue();
+            // Append to formData manually.
+            const formData = new FormData();
+            formData.append("ada_code", codeContent);
+            formData.append("csrfmiddlewaretoken", getCsrfToken());
+            handleFormSubmit(formData);
+        });
+
+        // Utility to get CSRF token (assuming it's included elsewhere in the template)
+        function getCsrfToken() {
+            const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
+            return csrfInput ? csrfInput.value : "";
+        }
     </script>
 </body>
 </html>

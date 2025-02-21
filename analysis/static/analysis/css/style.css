@@ -1,12 +1,21 @@
 body {
-background-color: #f8f9fa;
+    background-color: #F4F7FA;
+    font-family: Arial, sans-serif;
 }
 
 pre {
-white-space: pre-wrap; /* Wrap long lines */
-word-wrap: break-word;
+    white-space: pre-wrap; /* Wrap long lines */
+    word-wrap: break-word;
 }
 
 #resultsSection {
-margin-top: 20px;
+    margin-top: 20px;
+}
+
+/* Additional styling for D3 parse tree visualization */
+.link {
+    fill: none;
+}
+.node text {
+    pointer-events: none;
 }
