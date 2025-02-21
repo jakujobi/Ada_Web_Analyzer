@@ -101,23 +101,40 @@ class RDParser:
     def match(self, expected_token_type):
         """
         Compare the current token against the expected token type.
-        If they match, advance to the next token.
-        Otherwise, report an error.
+        Case insensitive comparison for identifiers and keywords.
         """
-        if self.current_token.token_type == expected_token_type:
+        # Convert current token's lexeme to uppercase for comparison
+        current_lexeme = self.current_token.lexeme.upper()
+        current_type = self.current_token.token_type
+
+        # For identifiers and keywords, check if it matches any reserved word
+        if current_type == self.defs.TokenType.ID:
+            reserved_type = self.defs.get_reserved_token(current_lexeme)
+            if reserved_type:
+                current_type = reserved_type
+
+        if current_type == expected_token_type:
             self.logger.debug(f"Matched {expected_token_type.name} with token '{self.current_token.lexeme}'.")
             self.advance()
         else:
             self.report_error(f"Expected {expected_token_type.name}, found '{self.current_token.lexeme}'")
-            # Optionally, panic recovery could be invoked here.
 
     def match_leaf(self, expected_token_type, parent_node):
         """
         Helper function for parse tree building.
-        Matches the expected token type, creates a leaf ParseTreeNode,
-        attaches it to parent_node (if provided), and advances the token.
+        Case insensitive comparison for identifiers and keywords.
         """
-        if self.current_token.token_type == expected_token_type:
+        # Convert current token's lexeme to uppercase for comparison
+        current_lexeme = self.current_token.lexeme.upper()
+        current_type = self.current_token.token_type
+
+        # For identifiers and keywords, check if it matches any reserved word
+        if current_type == self.defs.TokenType.ID:
+            reserved_type = self.defs.get_reserved_token(current_lexeme)
+            if reserved_type:
+                current_type = reserved_type
+
+        if current_type == expected_token_type:
             leaf = ParseTreeNode(expected_token_type.name, self.current_token)
             if parent_node:
                 parent_node.add_child(leaf)
@@ -458,4 +475,4 @@ class ParseTreeNode:
         return self.name
 
 # End of RDParser.py
-#Ada_Compiler_Construction\Modules\RDParser.py  
+#Ada_Compiler_Construction\Modules\RDParser.py

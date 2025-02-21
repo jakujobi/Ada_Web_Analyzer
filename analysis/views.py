@@ -32,10 +32,11 @@ def process_code_view(request):
 
     # 3. Run Lexical Analysis
     lexer = LexicalAnalyzer(stop_on_error=False)
+    defs = Definitions()                           # Create a shared Definitions instance
+    lexer.defs = defs                              # Use the same instance in lexer
     tokens = lexer.analyze(source_code)
 
-    # 4. Run Parsing
-    defs = Definitions()
+    # 4. Run Parsing using the same definitions instance
     parser = RDParser(tokens, defs, stop_on_error=False, panic_mode_recover=False, build_parse_tree=True)
     success = parser.parse()
 
