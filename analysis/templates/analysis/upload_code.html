@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ada Web Analyzer</title>
+</head>
+<body>
+    <h1>Ada Web Analyzer</h1>
+    <!-- File Upload Form -->
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="{% url 'process_code' %}">
+        {% csrf_token %}
+        <p>Select a .ada file to analyze:</p>
+        <input type="file" name="ada_file" accept=".ada" />
+        <button type="submit">Analyze File</button>
+    </form>
+
+    <!-- Code Editor Form -->
+    <form id="codeForm" method="POST" action="{% url 'process_code' %}">
+        {% csrf_token %}
+        <p>Or paste Ada code here:</p>
+        <textarea name="ada_code" rows="10" cols="70"></textarea>
+        <br/>
+        <button type="submit">Analyze Code</button>
+    </form>
+
+    <!-- Results Section -->
+    <h2>Results</h2>
+    <div id="results"></div>
+
+    <!-- Use JavaScript to fetch results via AJAX (optional) -->
+    <!-- Or just rely on Django's form submission for now. -->
+</body>
+</html>
