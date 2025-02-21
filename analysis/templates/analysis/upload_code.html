@@ -27,6 +27,14 @@
             border-color: #333;
             background-color: #f8f8f8;
         }
+        #file-preview {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fefefe;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -43,7 +51,8 @@
                 {% csrf_token %}
                 <div id="drop-zone">Drag and drop a file here or click to select one.</div>
                 <input id="file-input" class="form-control" type="file" name="ada_file" accept=".ada" style="display: none;" required />
-                <button type="submit" class="btn btn-primary w-100">
+                <div id="file-preview" class="d-none"></div>
+                <button type="submit" class="btn btn-primary w-100 mt-3">
                     Analyze File
                 </button>
                 </form>
@@ -181,6 +190,7 @@
     <script>
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
+        const filePreview = document.getElementById('file-preview');
 
         dropZone.addEventListener('click', () => fileInput.click());
 
@@ -202,8 +212,41 @@
             dropZone.classList.remove('hover');
             if (e.dataTransfer.files.length) {
                 fileInput.files = e.dataTransfer.files;
+                previewFile(e.dataTransfer.files[0]);
             }
         });
+
+        fileInput.addEventListener('change', function(e) {
+            if (fileInput.files.length) {
+                previewFile(fileInput.files[0]);
+            }
+        });
+
+        function previewFile(file) {
+            // Reset preview and error message container
+            filePreview.classList.add('d-none');
+            filePreview.textContent = "";
+            try {
+                // if (!file.type.endsWith(".ada")) {
+                //     throw new Error("Invalid file type. Please drop a .ada file.");
+                // }
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    // Show file name, size, and a snippet (first 200 characters)
+                    let previewText = `File: ${file.name}\nSize: ${file.size} bytes\n\nPreview:\n${content.substring(0, 200)}\n...`;
+                    filePreview.textContent = previewText;
+                    filePreview.classList.remove('d-none');
+                };
+                reader.onerror = function() {
+                    throw new Error("Error reading file.");
+                };
+                reader.readAsText(file);
+            } catch (err) {
+                filePreview.textContent = "Error: " + err.message;
+                filePreview.classList.remove('d-none');
+            }
+        }
     </script>
 </body>
 </html>
