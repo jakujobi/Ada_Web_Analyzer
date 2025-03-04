@@ -4,17 +4,20 @@
     <meta charset="UTF-8" />
     <title>Ada Web Analyzer</title>
 
-    <!-- Load static files -->
     {% load static %}
+
     <!-- Bootstrap CSS (via CDN) -->
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     />
+
     <!-- CodeMirror CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css" />
+
     <!-- Your custom CSS -->
     <link rel="stylesheet" href="{% static 'analysis/css/style.css' %}" />
+
     <style>
         body {
             background-color: #F4F7FA; /* light gray */
@@ -53,7 +56,8 @@
             border: 1px solid #0087F7;
             color: #333;
         }
-        .btn-copy, .btn-download {
+        .btn-copy,
+        .btn-download {
             margin-right: 5px;
         }
         #confirmation {
@@ -73,19 +77,19 @@
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0087F7;">
-      <div class="container">
-        <a class="navbar-brand" href="#">Ada Web Analyzer</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div id="navbarNav" class="collapse navbar-collapse">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a>
-            </li>
-          </ul>
+        <div class="container">
+            <a class="navbar-brand" href="#">Ada Web Analyzer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navbarNav" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-      </div>
     </nav>
 
     <div class="container py-4">
@@ -95,63 +99,82 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">How to Use</h5>
-                <p class="card-text">You can either drag and drop your <code>.ada</code> file or paste your Ada source code below. The analyzer will tokenize your file, build a parse tree and show logs/errors in real time. Use the Copy and Download buttons to save or share the results.</p>
+                <p class="card-text">
+                    You can either drag and drop your <code>.ada</code> file or paste your Ada source code below.
+                    The analyzer will tokenize your file, build a parse tree and show logs/errors in real time.
+                    Use the Copy and Download buttons to save or share the results.
+                </p>
             </div>
         </div>
 
-        <!-- NEW: Project & Creator Info Card -->
+        <!-- Project & Creator Info Card -->
         <div class="card">
             <div class="card-header" style="background-color: #005bb5; color: #fff;">Project &amp; Creator Info</div>
             <div class="card-body">
                 <p><strong>Project Version:</strong> 1.0</p>
                 <p>
-                  This project started out as part of the Ada Compiler Construction effort.
-                  See the original project on GitHub:
-                  <a href="https://github.com/jakujobi/Ada_Compiler_Construction" target="_blank">Ada_Compiler_Construction</a>
+                    This project started out as part of the Ada Compiler Construction effort.
+                    See the original project on GitHub:
+                    <a href="https://github.com/jakujobi/Ada_Compiler_Construction" target="_blank">Ada_Compiler_Construction</a>
                 </p>
                 <hr>
                 <p><strong>Creator:</strong> John Akujobi</p>
                 <p>
-                  Aspiring Software Engineer with a passion for AI/ML applications.
-                  Check out my GitHub:
-                  <a href="https://github.com/jakujobi" target="_blank">jakujobi</a>
-                  and visit my website:
-                  <a href="https://jakujobi.com" target="_blank">jakujobi.com</a>
+                    Aspiring Software Engineer with a passion for AI/ML applications.
+                    Check out my GitHub:
+                    <a href="https://github.com/jakujobi" target="_blank">jakujobi</a>
+                    and visit my website:
+                    <a href="https://jakujobi.com" target="_blank">jakujobi.com</a>
                 </p>
             </div>
         </div>
 
         <!-- Row for Upload or Paste Code -->
         <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-            <div class="card-header">Upload .ada File</div>
-            <div class="card-body">
-                <form id="uploadForm" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div id="drop-zone">Drag and drop a file here or click to select one.</div>
-                <input id="file-input" class="form-control" type="file" name="ada_file" accept=".ada" style="display: none;" required />
-                <div id="file-preview" class="d-none"></div>
-                <button type="submit" class="btn btn-primary w-100 mt-3">
-                    Analyze File
-                </button>
-                </form>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Upload .ada File</div>
+                    <div class="card-body">
+                        <!-- Note: No action/method to ensure we rely on JS only -->
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div id="drop-zone">Drag and drop a file here or click to select one.</div>
+                            <!-- Removed required to avoid forced reload or validation -->
+                            <input
+                                id="file-input"
+                                class="form-control"
+                                type="file"
+                                name="ada_file"
+                                accept=".ada"
+                                style="display: none;"
+                            />
+                            <div id="file-preview" class="d-none"></div>
+                            <button type="submit" class="btn btn-primary w-100 mt-3">
+                                Analyze File
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Paste Ada Code</div>
+                    <div class="card-body">
+                        <!-- No action/method -->
+                        <form id="codeForm">
+                            {% csrf_token %}
+                            <!-- Code Editor Container -->
+                            <div
+                                id="codeEditor"
+                                style="height: 300px; border: 1px solid #ddd;"
+                            ></div>
+                            <button type="submit" class="btn btn-success w-100 mt-3">
+                                Analyze Code
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card">
-            <div class="card-header">Paste Ada Code</div>
-            <div class="card-body">
-                <form id="codeForm">
-                {% csrf_token %}
-                <!-- Code Editor Container -->
-                <div id="codeEditor" style="height: 300px; border: 1px solid #ddd;"></div>
-                <button type="submit" class="btn btn-success w-100 mt-3">Analyze Code</button>
-                </form>
-            </div>
-            </div>
-        </div>
         </div>
 
         <!-- Confirmation Message -->
@@ -159,288 +182,204 @@
 
         <!-- Results Section -->
         <div id="resultsSection" class="d-none">
-        <ul class="nav nav-tabs" id="resultTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-            <button
-                class="nav-link active"
-                id="tokens-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#tokensTabContent"
-                type="button"
-                role="tab"
-                aria-controls="tokensTabContent"
-                aria-selected="true"
-            >
-                Tokens
-            </button>
-            </li>
-            <li class="nav-item" role="presentation">
-            <button
-                class="nav-link"
-                id="parseTree-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#parseTreeTabContent"
-                type="button"
-                role="tab"
-                aria-controls="parseTreeTabContent"
-                aria-selected="false"
-            >
-                Parse Tree
-            </button>
-            </li>
-            <li class="nav-item" role="presentation">
-            <button
-                class="nav-link"
-                id="logs-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#logsTabContent"
-                type="button"
-                role="tab"
-                aria-controls="logsTabContent"
-                aria-selected="false"
-            >
-                Logs / Errors
-            </button>
-            </li>
-        </ul>
-        <div class="tab-content border border-top-0 p-3" id="resultTabsContent">
-            <!-- Tokens Tab -->
-            <div
-            class="tab-pane fade show active"
-            id="tokensTabContent"
-            role="tabpanel"
-            aria-labelledby="tokens-tab"
-            >
-                <h5>Tokens</h5>
-                <table class="table table-sm table-striped" id="tokensTable">
-                    <thead>
-                    <tr>
-                        <th>Token Type</th>
-                        <th>Lexeme</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <div class="d-flex justify-content-end">
-                    <button class="btn btn-outline-primary btn-sm btn-download" id="downloadTokensBtn">
-                        Download Tokens
+            <ul class="nav nav-tabs" id="resultTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link active"
+                        id="tokens-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#tokensTabContent"
+                        type="button"
+                        role="tab"
+                        aria-controls="tokensTabContent"
+                        aria-selected="true"
+                    >
+                        Tokens
                     </button>
-                    <button class="btn btn-outline-primary btn-sm btn-copy" id="copyTokensBtn">Copy Tokens</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link"
+                        id="parseTree-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#parseTreeTabContent"
+                        type="button"
+                        role="tab"
+                        aria-controls="parseTreeTabContent"
+                        aria-selected="false"
+                    >
+                        Parse Tree
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link"
+                        id="logs-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#logsTabContent"
+                        type="button"
+                        role="tab"
+                        aria-controls="logsTabContent"
+                        aria-selected="false"
+                    >
+                        Logs / Errors
+                    </button>
+                </li>
+            </ul>
+            <div
+                class="tab-content border border-top-0 p-3"
+                id="resultTabsContent"
+            >
+                <!-- Tokens Tab -->
+                <div
+                    class="tab-pane fade show active"
+                    id="tokensTabContent"
+                    role="tabpanel"
+                    aria-labelledby="tokens-tab"
+                >
+                    <h5>Tokens</h5>
+                    <table class="table table-sm table-striped" id="tokensTable">
+                        <thead>
+                            <tr>
+                                <th>Token Type</th>
+                                <th>Lexeme</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="d-flex justify-content-end">
+                        <button
+                            class="btn btn-outline-primary btn-sm btn-download"
+                            id="downloadTokensBtn"
+                        >
+                            Download Tokens
+                        </button>
+                        <button
+                            class="btn btn-outline-primary btn-sm btn-copy"
+                            id="copyTokensBtn"
+                        >
+                            Copy Tokens
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Parse Tree Tab -->
-            <div
-            class="tab-pane fade"
-            id="parseTreeTabContent"
-            role="tabpanel"
-            aria-labelledby="parseTree-tab"
-            >
-                <h5>Parse Tree</h5>
-                <!-- New interactive visualization container -->
-                <div id="parseTreeViz"></div>
-                <div class="d-flex justify-content-end">
-                    <button class="btn btn-outline-primary btn-sm btn-download" id="downloadParseTreeBtn">
-                        Download Parse Tree
-                    </button>
-                    <button class="btn btn-outline-primary btn-sm btn-copy" id="copyParseTreeBtn">Copy Parse Tree</button>
+                <!-- Parse Tree Tab -->
+                <div
+                    class="tab-pane fade"
+                    id="parseTreeTabContent"
+                    role="tabpanel"
+                    aria-labelledby="parseTree-tab"
+                >
+                    <h5>Parse Tree</h5>
+                    <div id="parseTreeViz"></div>
+                    <div class="d-flex justify-content-end">
+                        <button
+                            class="btn btn-outline-primary btn-sm btn-download"
+                            id="downloadParseTreeBtn"
+                        >
+                            Download Parse Tree
+                        </button>
+                        <button
+                            class="btn btn-outline-primary btn-sm btn-copy"
+                            id="copyParseTreeBtn"
+                        >
+                            Copy Parse Tree
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Logs Tab -->
-            <div
-            class="tab-pane fade"
-            id="logsTabContent"
-            role="tabpanel"
-            aria-labelledby="logs-tab"
-            >
-                <h5>Logs / Errors</h5>
-                <pre id="logs" class="bg-white p-2"></pre>
-                <div class="d-flex justify-content-end">
-                    <button class="btn btn-outline-primary btn-sm btn-download" id="downloadLogsBtn">
-                        Download Logs
-                    </button>
-                    <button class="btn btn-outline-primary btn-sm btn-copy" id="copyLogsBtn">Copy Logs</button>
+                <!-- Logs Tab -->
+                <div
+                    class="tab-pane fade"
+                    id="logsTabContent"
+                    role="tabpanel"
+                    aria-labelledby="logs-tab"
+                >
+                    <h5>Logs / Errors</h5>
+                    <pre id="logs" class="bg-white p-2"></pre>
+                    <div class="d-flex justify-content-end">
+                        <button
+                            class="btn btn-outline-primary btn-sm btn-download"
+                            id="downloadLogsBtn"
+                        >
+                            Download Logs
+                        </button>
+                        <button
+                            class="btn btn-outline-primary btn-sm btn-copy"
+                            id="copyLogsBtn"
+                        >
+                            Copy Logs
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 
     <!-- About Modal -->
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header" style="background-color: #0087F7; color:#fff;">
-            <h5 class="modal-title" id="aboutModalLabel">About Ada Web Analyzer</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Ada Web Analyzer is a tool that tokenizes and parses Ada source code. It provides a visual parse tree, token list, and logs with errors if any. It is designed with a clean, techy interface using shades of blue and light gray.</p>
-            <p>Simply drop your file or paste your source code and click on the analyze buttons.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
+    <div
+        class="modal fade"
+        id="aboutModal"
+        tabindex="-1"
+        aria-labelledby="aboutModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div
+                    class="modal-header"
+                    style="background-color: #0087F7; color: #fff;"
+                >
+                    <h5 class="modal-title" id="aboutModalLabel">
+                        About Ada Web Analyzer
+                    </h5>
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    ></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Ada Web Analyzer is a tool that tokenizes and parses Ada
+                        source code. It provides a visual parse tree, token list,
+                        and logs with errors if any. It is designed with a clean,
+                        techy interface using shades of blue and light gray.
+                    </p>
+                    <p>
+                        Simply drop your file or paste your source code and click
+                        on the analyze buttons.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <!-- Bootstrap JS (via CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    ></script>
     <!-- CodeMirror JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"
+    ></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"
+    ></script>
     <!-- D3.js (for interactive parse tree) -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <!-- Your custom JS -->
+
+    <!-- Your custom JS (main.js) -->
     <script src="{% static 'analysis/js/main.js' %}"></script>
-    <script>
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const filePreview = document.getElementById('file-preview');
-
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        dropZone.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.add('hover');
-        });
-
-        dropZone.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.remove('hover');
-        });
-
-        dropZone.addEventListener('drop', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.remove('hover');
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                previewFile(e.dataTransfer.files[0]);
-            }
-        });
-
-        fileInput.addEventListener('change', function(e) {
-            if (fileInput.files.length) {
-                previewFile(fileInput.files[0]);
-            }
-        });
-
-        function previewFile(file) {
-            // Reset preview and error message container
-            filePreview.classList.add('d-none');
-            filePreview.textContent = "";
-            try {
-                if (!file.name.endsWith(".ada")) {
-                    throw new Error("Invalid file type. Please select a .ada file.");
-                }
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    const content = e.target.result;
-                    // Show file name, size, and a snippet (first 200 characters)
-                    let previewText = `File: ${file.name}\nSize: ${file.size} bytes\n\nPreview:\n${content.substring(0, 200)}\n...`;
-                    filePreview.textContent = previewText;
-                    filePreview.classList.remove('d-none');
-                };
-                reader.onerror = function() {
-                    throw new Error("Error reading file.");
-                };
-                reader.readAsText(file);
-            } catch (err) {
-                filePreview.textContent = "Error: " + err.message;
-                filePreview.classList.remove('d-none');
-            }
-        }
-
-        // Functions for Copy and Download
-        function copyText(elementId) {
-            const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Text copied to clipboard!");
-            }).catch(() => {
-                alert("Failed to copy text.");
-            });
-        }
-
-        function downloadText(elementId, filename) {
-            const text = document.getElementById(elementId).innerText;
-            const blob = new Blob([text], {type: "text/plain"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        document.getElementById("copyTokensBtn").addEventListener("click", function() {
-            copyText("tokensTable");
-        });
-        document.getElementById("downloadTokensBtn").addEventListener("click", function() {
-            downloadText("tokensTable", "tokens.txt");
-        });
-        document.getElementById("copyParseTreeBtn").addEventListener("click", function() {
-            copyText("parseTree");
-        });
-        document.getElementById("downloadParseTreeBtn").addEventListener("click", function() {
-            downloadText("parseTree", "parsetree.txt");
-        });
-        document.getElementById("copyLogsBtn").addEventListener("click", function() {
-            copyText("logs");
-        });
-        document.getElementById("downloadLogsBtn").addEventListener("click", function() {
-            downloadText("logs", "logs.txt");
-        });
-
-        // Simulated live Log refresh
-        function updateLogs() {
-            // In a real application, replace this with an AJAX call to fetch new logs.
-            const logPre = document.getElementById("logs");
-            const timestamp = new Date().toLocaleTimeString();
-            logPre.textContent += `[${timestamp}] Live log update...\n`;
-        }
-        setInterval(updateLogs, 5000);
-
-        // Simulated confirmation message on analysis completion
-        // In your actual analysis AJAX success callback, set confirmation text accordingly.
-        // For demo, we set a timeout.
-        setTimeout(() => {
-            // Assume analysis was successful if logs indicate no errors.
-            const logsContent = document.getElementById("logs").innerText;
-            const message = logsContent.includes("error") ? "Analysis completed with errors." : "Analysis successful. No errors found.";
-            document.getElementById("confirmation").textContent = message;
-            document.getElementById("resultsSection").classList.remove("d-none");
-        }, 2000);
-
-        // Initialize CodeMirror on the code editor container
-        const codeEditor = CodeMirror(document.getElementById("codeEditor"), {
-            lineNumbers: true,
-            mode: "text/x-csrc", // Ada doesn't have a built-in mode, so using C-like highlighting
-            theme: "default"
-        });
-
-        // When the codeForm is submitted, send the content from CodeMirror
-        document.getElementById("codeForm").addEventListener("submit", function (e) {
-            e.preventDefault();
-            // Create a hidden textarea to include the CodeMirror content
-            let codeContent = codeEditor.getValue();
-            // Append to formData manually.
-            const formData = new FormData();
-            formData.append("ada_code", codeContent);
-            formData.append("csrfmiddlewaretoken", getCsrfToken());
-            handleFormSubmit(formData);
-        });
-
-        // Utility to get CSRF token (assuming it's included elsewhere in the template)
-        function getCsrfToken() {
-            const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
-            return csrfInput ? csrfInput.value : "";
-        }
-    </script>
 </body>
 </html>
