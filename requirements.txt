@@ -1,0 +1,30 @@
+# Django Web Framework
+Django>=4.2.5,<5.0  # Adjust version based on your needs
+
+# Gunicorn - WSGI HTTP Server for Django
+gunicorn>=20.1.0
+
+# Database Drivers (Choose one based on your database)
+psycopg2-binary>=2.9.6  # PostgreSQL (Recommended for production)
+# mysqlclient>=2.1.1    # Uncomment if using MySQL
+# sqlite3                # Uncomment if using SQLite (included in Python)
+
+# Static Files Handling
+whitenoise>=6.5.0  # Serves static files in production
+
+# Additional Django Packages
+django-environ>=0.10.0  # Environment variable management
+
+# Parsing and Code Processing
+lark-parser>=0.12.0  # If used in your project
+djangorestframework>=3.14.0  # If using Django REST API
+
+# Frontend Libraries (if needed)
+django-cors-headers>=3.13.0  # CORS Handling
+django-compressor>=4.4  # Compresses static files
+
+# Optional: If Using D3.js for Visualization
+d3py>=0.2.1
+
+# Security and Performance Enhancements
+uvicorn>=0.24.0  # For ASGI apps (if needed)
