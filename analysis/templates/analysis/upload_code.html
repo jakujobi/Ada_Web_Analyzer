@@ -7,10 +7,7 @@
     {% load static %}
 
     <!-- Bootstrap CSS (via CDN) -->
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 
     <!-- CodeMirror CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css" />
@@ -20,7 +17,7 @@
 
     <style>
         body {
-            background-color: #F4F7FA; /* light gray */
+            background-color: #F4F7FA;
             color: #333;
             font-family: Arial, sans-serif;
         }
@@ -37,6 +34,7 @@
             color: #555;
             margin-bottom: 20px;
             background-color: #E8F0FE;
+            cursor: pointer;
         }
         #drop-zone.hover {
             border-color: #005bb5;
@@ -56,8 +54,7 @@
             border: 1px solid #0087F7;
             color: #333;
         }
-        .btn-copy,
-        .btn-download {
+        .btn-copy, .btn-download {
             margin-right: 5px;
         }
         #confirmation {
@@ -100,8 +97,8 @@
             <div class="card-body">
                 <h5 class="card-title">How to Use</h5>
                 <p class="card-text">
-                    You can either drag and drop your <code>.ada</code> file or paste your Ada source code below.
-                    The analyzer will tokenize your file, build a parse tree and show logs/errors in real time.
+                    Drag and drop your <code>.ada</code> file or paste your Ada source code below.
+                    The analyzer will tokenize your file, build a parse tree, and display logs/errors.
                     Use the Copy and Download buttons to save or share the results.
                 </p>
             </div>
@@ -113,7 +110,7 @@
             <div class="card-body">
                 <p><strong>Project Version:</strong> 1.0</p>
                 <p>
-                    This project started out as part of the Ada Compiler Construction effort.
+                    This project started as part of the Ada Compiler Construction effort.
                     See the original project on GitHub:
                     <a href="https://github.com/jakujobi/Ada_Compiler_Construction" target="_blank">Ada_Compiler_Construction</a>
                 </p>
@@ -131,46 +128,33 @@
 
         <!-- Row for Upload or Paste Code -->
         <div class="row mb-4">
+            <!-- File Upload Form -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">Upload .ada File</div>
                     <div class="card-body">
-                        <!-- Note: No action/method to ensure we rely on JS only -->
+                        <!-- No action or method; handled by JS -->
                         <form id="uploadForm" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div id="drop-zone">Drag and drop a file here or click to select one.</div>
-                            <!-- Removed required to avoid forced reload or validation -->
-                            <input
-                                id="file-input"
-                                class="form-control"
-                                type="file"
-                                name="ada_file"
-                                accept=".ada"
-                                style="display: none;"
-                            />
+                            <input id="file-input" class="form-control" type="file" name="ada_file" accept=".ada" style="display: none;" />
                             <div id="file-preview" class="d-none"></div>
-                            <button type="submit" class="btn btn-primary w-100 mt-3">
-                                Analyze File
-                            </button>
+                            <button type="submit" class="btn btn-primary w-100 mt-3">Analyze File</button>
                         </form>
                     </div>
                 </div>
             </div>
+            <!-- Code Paste Form -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">Paste Ada Code</div>
                     <div class="card-body">
-                        <!-- No action/method -->
+                        <!-- No action or method; handled by JS -->
                         <form id="codeForm">
                             {% csrf_token %}
-                            <!-- Code Editor Container -->
-                            <div
-                                id="codeEditor"
-                                style="height: 300px; border: 1px solid #ddd;"
-                            ></div>
-                            <button type="submit" class="btn btn-success w-100 mt-3">
-                                Analyze Code
-                            </button>
+                            <!-- CodeMirror container -->
+                            <div id="codeEditor" style="height: 300px; border: 1px solid #ddd;"></div>
+                            <button type="submit" class="btn btn-success w-100 mt-3">Analyze Code</button>
                         </form>
                     </div>
                 </div>
@@ -184,59 +168,24 @@
         <div id="resultsSection" class="d-none">
             <ul class="nav nav-tabs" id="resultTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button
-                        class="nav-link active"
-                        id="tokens-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#tokensTabContent"
-                        type="button"
-                        role="tab"
-                        aria-controls="tokensTabContent"
-                        aria-selected="true"
-                    >
+                    <button class="nav-link active" id="tokens-tab" data-bs-toggle="tab" data-bs-target="#tokensTabContent" type="button" role="tab" aria-controls="tokensTabContent" aria-selected="true">
                         Tokens
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button
-                        class="nav-link"
-                        id="parseTree-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#parseTreeTabContent"
-                        type="button"
-                        role="tab"
-                        aria-controls="parseTreeTabContent"
-                        aria-selected="false"
-                    >
+                    <button class="nav-link" id="parseTree-tab" data-bs-toggle="tab" data-bs-target="#parseTreeTabContent" type="button" role="tab" aria-controls="parseTreeTabContent" aria-selected="false">
                         Parse Tree
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button
-                        class="nav-link"
-                        id="logs-tab"
-                        data-bs-toggle="tab"
-                        data-bs-target="#logsTabContent"
-                        type="button"
-                        role="tab"
-                        aria-controls="logsTabContent"
-                        aria-selected="false"
-                    >
+                    <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logsTabContent" type="button" role="tab" aria-controls="logsTabContent" aria-selected="false">
                         Logs / Errors
                     </button>
                 </li>
             </ul>
-            <div
-                class="tab-content border border-top-0 p-3"
-                id="resultTabsContent"
-            >
+            <div class="tab-content border border-top-0 p-3" id="resultTabsContent">
                 <!-- Tokens Tab -->
-                <div
-                    class="tab-pane fade show active"
-                    id="tokensTabContent"
-                    role="tabpanel"
-                    aria-labelledby="tokens-tab"
-                >
+                <div class="tab-pane fade show active" id="tokensTabContent" role="tabpanel" aria-labelledby="tokens-tab">
                     <h5>Tokens</h5>
                     <table class="table table-sm table-striped" id="tokensTable">
                         <thead>
@@ -248,68 +197,26 @@
                         <tbody></tbody>
                     </table>
                     <div class="d-flex justify-content-end">
-                        <button
-                            class="btn btn-outline-primary btn-sm btn-download"
-                            id="downloadTokensBtn"
-                        >
-                            Download Tokens
-                        </button>
-                        <button
-                            class="btn btn-outline-primary btn-sm btn-copy"
-                            id="copyTokensBtn"
-                        >
-                            Copy Tokens
-                        </button>
+                        <button class="btn btn-outline-primary btn-sm btn-download" id="downloadTokensBtn">Download Tokens</button>
+                        <button class="btn btn-outline-primary btn-sm btn-copy" id="copyTokensBtn">Copy Tokens</button>
                     </div>
                 </div>
-
                 <!-- Parse Tree Tab -->
-                <div
-                    class="tab-pane fade"
-                    id="parseTreeTabContent"
-                    role="tabpanel"
-                    aria-labelledby="parseTree-tab"
-                >
+                <div class="tab-pane fade" id="parseTreeTabContent" role="tabpanel" aria-labelledby="parseTree-tab">
                     <h5>Parse Tree</h5>
                     <div id="parseTreeViz"></div>
                     <div class="d-flex justify-content-end">
-                        <button
-                            class="btn btn-outline-primary btn-sm btn-download"
-                            id="downloadParseTreeBtn"
-                        >
-                            Download Parse Tree
-                        </button>
-                        <button
-                            class="btn btn-outline-primary btn-sm btn-copy"
-                            id="copyParseTreeBtn"
-                        >
-                            Copy Parse Tree
-                        </button>
+                        <button class="btn btn-outline-primary btn-sm btn-download" id="downloadParseTreeBtn">Download Parse Tree</button>
+                        <button class="btn btn-outline-primary btn-sm btn-copy" id="copyParseTreeBtn">Copy Parse Tree</button>
                     </div>
                 </div>
-
                 <!-- Logs Tab -->
-                <div
-                    class="tab-pane fade"
-                    id="logsTabContent"
-                    role="tabpanel"
-                    aria-labelledby="logs-tab"
-                >
+                <div class="tab-pane fade" id="logsTabContent" role="tabpanel" aria-labelledby="logs-tab">
                     <h5>Logs / Errors</h5>
                     <pre id="logs" class="bg-white p-2"></pre>
                     <div class="d-flex justify-content-end">
-                        <button
-                            class="btn btn-outline-primary btn-sm btn-download"
-                            id="downloadLogsBtn"
-                        >
-                            Download Logs
-                        </button>
-                        <button
-                            class="btn btn-outline-primary btn-sm btn-copy"
-                            id="copyLogsBtn"
-                        >
-                            Copy Logs
-                        </button>
+                        <button class="btn btn-outline-primary btn-sm btn-download" id="downloadLogsBtn">Download Logs</button>
+                        <button class="btn btn-outline-primary btn-sm btn-copy" id="copyLogsBtn">Copy Logs</button>
                     </div>
                 </div>
             </div>
@@ -317,69 +224,43 @@
     </div>
 
     <!-- About Modal -->
-    <div
-        class="modal fade"
-        id="aboutModal"
-        tabindex="-1"
-        aria-labelledby="aboutModalLabel"
-        aria-hidden="true"
-    >
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div
-                    class="modal-header"
-                    style="background-color: #0087F7; color: #fff;"
-                >
-                    <h5 class="modal-title" id="aboutModalLabel">
-                        About Ada Web Analyzer
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                    ></button>
+                <div class="modal-header" style="background-color: #0087F7; color: #fff;">
+                    <h5 class="modal-title" id="aboutModalLabel">About Ada Web Analyzer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>
-                        Ada Web Analyzer is a tool that tokenizes and parses Ada
-                        source code. It provides a visual parse tree, token list,
-                        and logs with errors if any. It is designed with a clean,
-                        techy interface using shades of blue and light gray.
-                    </p>
-                    <p>
-                        Simply drop your file or paste your source code and click
-                        on the analyze buttons.
+                        Ada Web Analyzer tokenizes and parses Ada source code, providing a visual parse tree, token list, and logs/errors.
+                        Simply drop your file or paste your code and click on the analyze buttons.
                     </p>
                 </div>
                 <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal"
-                    >
-                        Close
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Bootstrap JS (via CDN) -->
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- CodeMirror JS -->
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"
-    ></script>
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"
-    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
     <!-- D3.js (for interactive parse tree) -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-
-    <!-- Your custom JS (main.js) -->
+    <!-- Your custom JS -->
     <script src="{% static 'analysis/js/main.js' %}"></script>
+    <!-- Global drag & drop prevention -->
+    <script>
+      document.addEventListener("dragover", function(e) {
+          e.preventDefault();
+      });
+      document.addEventListener("drop", function(e) {
+          e.preventDefault();
+      });
+    </script>
 </body>
 </html>
