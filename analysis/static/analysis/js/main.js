@@ -22,13 +22,22 @@ let logsData = [];
 
 // ====== CodeMirror Editor Setup ======
 console.log("Initializing CodeMirror...");
-const codeEditor = CodeMirror(document.getElementById("codeEditor"), {
-    lineNumbers: true,
-    mode: "text/x-csrc", // Using C-like highlighting as a fallback
-    theme: "default",
-    readOnly: false
-});
-console.log("CodeMirror initialized.");
+let codeEditor;
+try {
+    if (document.getElementById("codeEditor")) {
+        codeEditor = CodeMirror(document.getElementById("codeEditor"), {
+            lineNumbers: true,
+            mode: "text/x-csrc", // Using C-like highlighting as a fallback
+            theme: "default",
+            readOnly: false
+        });
+        console.log("CodeMirror initialized.");
+    } else {
+        console.error("CodeEditor element not found");
+    }
+} catch (error) {
+    console.error("Error initializing CodeMirror:", error);
+}
 
 // ====== AJAX Submission Functions ======
 async function handleFormSubmit(formData) {
@@ -36,6 +45,9 @@ async function handleFormSubmit(formData) {
     const response = await fetch("/process/", {
         method: "POST",
         body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     });
     if (!response.ok) {
         console.error("Server returned error status:", response.status);
@@ -54,88 +66,110 @@ function displayResults(data) {
     console.log("Received data:", data);
 
     // Clear previous results
-    tokensTableBody.innerHTML = "";
-    logsPre.textContent = "";
-    parseTreeViz.innerHTML = "";
+    if (tokensTableBody) tokensTableBody.innerHTML = "";
+    if (logsPre) logsPre.textContent = "";
+    if (parseTreeViz) parseTreeViz.innerHTML = "";
 
     // Display Tokens
     tokensData = data.tokens || [];
-    tokensData.forEach(([tokenType, lexeme]) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${tokenType}</td><td>${lexeme}</td>`;
-    tokensTableBody.appendChild(row);
-    });
+    if (tokensTableBody) {
+        tokensData.forEach(([tokenType, lexeme]) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${tokenType}</td><td>${lexeme}</td>`;
+            tokensTableBody.appendChild(row);
+        });
+    }
 
     // Display Parse Tree (as plain text in a <pre>)
     parseTreeData = data.parse_tree || "";
-    const pre = document.createElement("pre");
-    pre.id = "parseTree";
-    pre.textContent = parseTreeData;
-    parseTreeViz.appendChild(pre);
+    if (parseTreeViz) {
+        const pre = document.createElement("pre");
+        pre.id = "parseTree";
+        pre.textContent = parseTreeData;
+        parseTreeViz.appendChild(pre);
+    }
 
     // Display Logs / Errors
     logsData = data.errors || [];
-    logsPre.textContent = logsData.join("\n");
+    if (logsPre) {
+        logsPre.textContent = logsData.join("\n");
+    }
 
     // Reveal the results section
-    resultsSection.classList.remove("d-none");
+    if (resultsSection) {
+        resultsSection.classList.remove("d-none");
+    }
 }
 
 // ====== Event Listeners for Forms ======
-uploadForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    console.log("Upload form submitted via JS.");
-    const formData = new FormData(uploadForm);
-    formData.append("csrfmiddlewaretoken", getCsrfToken());
-    handleFormSubmit(formData);
-});
+if (uploadForm) {
+    uploadForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log("Upload form submitted via JS.");
+        const formData = new FormData(uploadForm);
+        formData.append("csrfmiddlewaretoken", getCsrfToken());
+        handleFormSubmit(formData);
+    });
+}
 
-codeForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    console.log("Code form submitted via JS.");
-    const formData = new FormData();
-    const codeContent = codeEditor.getValue();
-    formData.append("ada_code", codeContent);
-    formData.append("csrfmiddlewaretoken", getCsrfToken());
-    handleFormSubmit(formData);
-});
+if (codeForm) {
+    codeForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log("Code form submitted via JS.");
+        const formData = new FormData();
+        if (codeEditor) {
+            const codeContent = codeEditor.getValue();
+            formData.append("ada_code", codeContent);
+        } else {
+            console.error("CodeEditor not initialized");
+        }
+        formData.append("csrfmiddlewaretoken", getCsrfToken());
+        handleFormSubmit(formData);
+    });
+}
 
 // ====== File Drag & Drop Handling ======
 const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("file-input");
 const filePreview = document.getElementById("file-preview");
 
-dropZone.addEventListener("click", () => fileInput.click());
+if (dropZone && fileInput) {
+    dropZone.addEventListener("click", () => fileInput.click());
 
-dropZone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.add("hover");
-});
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add("hover");
+    });
 
-dropZone.addEventListener("dragleave", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.remove("hover");
-});
+    dropZone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("hover");
+    });
 
-dropZone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.remove("hover");
-    if (e.dataTransfer.files.length) {
-    fileInput.files = e.dataTransfer.files;
-    previewFile(e.dataTransfer.files[0]);
-    }
-});
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("hover");
+        if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        previewFile(e.dataTransfer.files[0]);
+        }
+    });
+}
 
-fileInput.addEventListener("change", (e) => {
-    if (fileInput.files.length) {
-    previewFile(fileInput.files[0]);
-    }
-});
+if (fileInput) {
+    fileInput.addEventListener("change", (e) => {
+        if (fileInput.files.length) {
+        previewFile(fileInput.files[0]);
+        }
+    });
+}
 
 function previewFile(file) {
+    if (!filePreview) return;
+    
     filePreview.classList.add("d-none");
     filePreview.textContent = "";
     if (!file.name.endsWith(".ada")) {
@@ -185,32 +219,53 @@ function downloadFile(filename, content) {
 }
 
 // ====== Download Button Event Listeners ======
-downloadTokensBtn.addEventListener("click", () => {
-    const content = tokensData.map(([t, l]) => `${t}: ${l}`).join("\n");
-    downloadFile("tokens.txt", content);
-});
-downloadParseTreeBtn.addEventListener("click", () => {
-    downloadFile("parse_tree.txt", parseTreeData);
-});
-downloadLogsBtn.addEventListener("click", () => {
-    downloadFile("logs.txt", logsData.join("\n"));
-});
+if (downloadTokensBtn) {
+    downloadTokensBtn.addEventListener("click", () => {
+        const content = tokensData.map(([t, l]) => `${t}: ${l}`).join("\n");
+        downloadFile("tokens.txt", content);
+    });
+}
+
+if (downloadParseTreeBtn) {
+    downloadParseTreeBtn.addEventListener("click", () => {
+        downloadFile("parse_tree.txt", parseTreeData);
+    });
+}
+
+if (downloadLogsBtn) {
+    downloadLogsBtn.addEventListener("click", () => {
+        downloadFile("logs.txt", logsData.join("\n"));
+    });
+}
 
 // ====== Copy Button Event Listeners ======
-document.getElementById("copyTokensBtn").addEventListener("click", () => {
-    copyText("tokensTable");
-});
-document.getElementById("copyParseTreeBtn").addEventListener("click", () => {
-    copyText("parseTreeViz");
-});
-document.getElementById("copyLogsBtn").addEventListener("click", () => {
-    copyText("logs");
-});
+const copyTokensBtn = document.getElementById("copyTokensBtn");
+if (copyTokensBtn) {
+    copyTokensBtn.addEventListener("click", () => {
+        copyText("tokensTable");
+    });
+}
+
+const copyParseTreeBtn = document.getElementById("copyParseTreeBtn");
+if (copyParseTreeBtn) {
+    copyParseTreeBtn.addEventListener("click", () => {
+        copyText("parseTree");
+    });
+}
+
+const copyLogsBtn = document.getElementById("copyLogsBtn");
+if (copyLogsBtn) {
+    copyLogsBtn.addEventListener("click", () => {
+        copyText("logs");
+    });
+}
 
 // ====== Optional: Live Log Refresh (Demo) ======
 function updateLogs() {
-    const timestamp = new Date().toLocaleTimeString();
-    logsPre.textContent += `[${timestamp}] Live log update...\n`;
+    // This is a placeholder for potential future functionality
+    // console.log("Checking for log updates...");
 }
-setInterval(updateLogs, 5000);
+
+// Uncomment if you want to enable periodic log refreshing
+// setInterval(updateLogs, 5000);
 });
