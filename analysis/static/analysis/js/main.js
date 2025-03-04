@@ -2,18 +2,36 @@
 document.addEventListener("DOMContentLoaded", () => {
 console.log("main.js loaded successfully.");
 
+// Debug info for production troubleshooting
+console.log("Window location:", window.location.href);
+console.log("Document readyState:", document.readyState);
+
 // ====== DOM Elements ======
 const uploadForm = document.getElementById("uploadForm");
+console.log("Upload form found:", !!uploadForm);
+
 const codeForm = document.getElementById("codeForm");
+console.log("Code form found:", !!codeForm);
+
 const resultsSection = document.getElementById("resultsSection");
 
 const tokensTableBody = document.querySelector("#tokensTable tbody");
+console.log("Tokens table body found:", !!tokensTableBody);
+
 const parseTreeViz = document.getElementById("parseTreeViz");
+console.log("Parse tree viz found:", !!parseTreeViz);
+
 const logsPre = document.getElementById("logs");
+console.log("Logs pre found:", !!logsPre);
 
 const downloadTokensBtn = document.getElementById("downloadTokensBtn");
+console.log("Download tokens button found:", !!downloadTokensBtn);
+
 const downloadParseTreeBtn = document.getElementById("downloadParseTreeBtn");
+console.log("Download parse tree button found:", !!downloadParseTreeBtn);
+
 const downloadLogsBtn = document.getElementById("downloadLogsBtn");
+console.log("Download logs button found:", !!downloadLogsBtn);
 
 // Global variables for results
 let tokensData = [];
@@ -42,23 +60,53 @@ try {
 // ====== AJAX Submission Functions ======
 async function handleFormSubmit(formData) {
     try {
-    const response = await fetch("/process/", {
+    console.log("Submitting form data...");
+    // Log the form data for debugging (excluding file contents for brevity)
+    for (let pair of formData.entries()) {
+        if (pair[0] !== 'ada_file' && pair[0] !== 'ada_code') {
+            console.log(pair[0] + ': ' + pair[1]);
+        } else {
+            console.log(pair[0] + ': [content not shown]');
+        }
+    }
+    
+    // Get the absolute URL for the process endpoint
+    const processUrl = new URL('/process/', window.location.href).href;
+    console.log("Submitting to URL:", processUrl);
+    
+    const response = await fetch(processUrl, {
         method: "POST",
         body: formData,
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
     });
+    
+    console.log("Response status:", response.status);
+    
     if (!response.ok) {
         console.error("Server returned error status:", response.status);
-        alert("An error occurred. Please try again.");
+        alert("An error occurred. Please try again. Status: " + response.status);
         return;
     }
+    
+    const contentType = response.headers.get('content-type');
+    console.log("Response content type:", contentType);
+    
+    if (!contentType || !contentType.includes('application/json')) {
+        console.error("Unexpected content type:", contentType);
+        const text = await response.text();
+        console.log("Response text (first 500 chars):", text.substring(0, 500));
+        alert("Server returned an unexpected response format. See console for details.");
+        return;
+    }
+    
     const data = await response.json();
+    console.log("Received data:", data);
     displayResults(data);
     } catch (error) {
     console.error("AJAX request failed:", error);
-    alert("Request failed. See console for details.");
+    alert("Request failed: " + error.message + ". See console for details.");
     }
 }
 
@@ -194,7 +242,29 @@ function previewFile(file) {
 // ====== Utility Functions ======
 function getCsrfToken() {
     const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
-    return csrfInput ? csrfInput.value : "";
+    if (!csrfInput) {
+        console.error("CSRF token input not found in the document");
+        // Try to get from cookie as fallback
+        return getCsrfCookie();
+    }
+    return csrfInput.value;
+}
+
+function getCsrfCookie() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    console.log("CSRF cookie found:", !!cookieValue);
+    return cookieValue;
 }
 
 function copyText(elementId) {

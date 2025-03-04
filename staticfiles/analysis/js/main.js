@@ -2,18 +2,36 @@
 document.addEventListener("DOMContentLoaded", () => {
 console.log("main.js loaded successfully.");
 
+// Debug info for production troubleshooting
+console.log("Window location:", window.location.href);
+console.log("Document readyState:", document.readyState);
+
 // ====== DOM Elements ======
 const uploadForm = document.getElementById("uploadForm");
+console.log("Upload form found:", !!uploadForm);
+
 const codeForm = document.getElementById("codeForm");
+console.log("Code form found:", !!codeForm);
+
 const resultsSection = document.getElementById("resultsSection");
 
 const tokensTableBody = document.querySelector("#tokensTable tbody");
+console.log("Tokens table body found:", !!tokensTableBody);
+
 const parseTreeViz = document.getElementById("parseTreeViz");
+console.log("Parse tree viz found:", !!parseTreeViz);
+
 const logsPre = document.getElementById("logs");
+console.log("Logs pre found:", !!logsPre);
 
 const downloadTokensBtn = document.getElementById("downloadTokensBtn");
+console.log("Download tokens button found:", !!downloadTokensBtn);
+
 const downloadParseTreeBtn = document.getElementById("downloadParseTreeBtn");
+console.log("Download parse tree button found:", !!downloadParseTreeBtn);
+
 const downloadLogsBtn = document.getElementById("downloadLogsBtn");
+console.log("Download logs button found:", !!downloadLogsBtn);
 
 // Global variables for results
 let tokensData = [];
@@ -22,31 +40,73 @@ let logsData = [];
 
 // ====== CodeMirror Editor Setup ======
 console.log("Initializing CodeMirror...");
-const codeEditor = CodeMirror(document.getElementById("codeEditor"), {
-    lineNumbers: true,
-    mode: "text/x-csrc", // Using C-like highlighting as a fallback
-    theme: "default",
-    readOnly: false
-});
-console.log("CodeMirror initialized.");
+let codeEditor;
+try {
+    if (document.getElementById("codeEditor")) {
+        codeEditor = CodeMirror(document.getElementById("codeEditor"), {
+            lineNumbers: true,
+            mode: "text/x-csrc", // Using C-like highlighting as a fallback
+            theme: "default",
+            readOnly: false
+        });
+        console.log("CodeMirror initialized.");
+    } else {
+        console.error("CodeEditor element not found");
+    }
+} catch (error) {
+    console.error("Error initializing CodeMirror:", error);
+}
 
 // ====== AJAX Submission Functions ======
 async function handleFormSubmit(formData) {
     try {
-    const response = await fetch("/process/", {
+    console.log("Submitting form data...");
+    // Log the form data for debugging (excluding file contents for brevity)
+    for (let pair of formData.entries()) {
+        if (pair[0] !== 'ada_file' && pair[0] !== 'ada_code') {
+            console.log(pair[0] + ': ' + pair[1]);
+        } else {
+            console.log(pair[0] + ': [content not shown]');
+        }
+    }
+    
+    // Get the absolute URL for the process endpoint
+    const processUrl = new URL('/process/', window.location.href).href;
+    console.log("Submitting to URL:", processUrl);
+    
+    const response = await fetch(processUrl, {
         method: "POST",
         body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
     });
+    
+    console.log("Response status:", response.status);
+    
     if (!response.ok) {
         console.error("Server returned error status:", response.status);
-        alert("An error occurred. Please try again.");
+        alert("An error occurred. Please try again. Status: " + response.status);
         return;
     }
+    
+    const contentType = response.headers.get('content-type');
+    console.log("Response content type:", contentType);
+    
+    if (!contentType || !contentType.includes('application/json')) {
+        console.error("Unexpected content type:", contentType);
+        const text = await response.text();
+        console.log("Response text (first 500 chars):", text.substring(0, 500));
+        alert("Server returned an unexpected response format. See console for details.");
+        return;
+    }
+    
     const data = await response.json();
+    console.log("Received data:", data);
     displayResults(data);
     } catch (error) {
     console.error("AJAX request failed:", error);
-    alert("Request failed. See console for details.");
+    alert("Request failed: " + error.message + ". See console for details.");
     }
 }
 
@@ -54,88 +114,110 @@ function displayResults(data) {
     console.log("Received data:", data);
 
     // Clear previous results
-    tokensTableBody.innerHTML = "";
-    logsPre.textContent = "";
-    parseTreeViz.innerHTML = "";
+    if (tokensTableBody) tokensTableBody.innerHTML = "";
+    if (logsPre) logsPre.textContent = "";
+    if (parseTreeViz) parseTreeViz.innerHTML = "";
 
     // Display Tokens
     tokensData = data.tokens || [];
-    tokensData.forEach(([tokenType, lexeme]) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${tokenType}</td><td>${lexeme}</td>`;
-    tokensTableBody.appendChild(row);
-    });
+    if (tokensTableBody) {
+        tokensData.forEach(([tokenType, lexeme]) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${tokenType}</td><td>${lexeme}</td>`;
+            tokensTableBody.appendChild(row);
+        });
+    }
 
     // Display Parse Tree (as plain text in a <pre>)
     parseTreeData = data.parse_tree || "";
-    const pre = document.createElement("pre");
-    pre.id = "parseTree";
-    pre.textContent = parseTreeData;
-    parseTreeViz.appendChild(pre);
+    if (parseTreeViz) {
+        const pre = document.createElement("pre");
+        pre.id = "parseTree";
+        pre.textContent = parseTreeData;
+        parseTreeViz.appendChild(pre);
+    }
 
     // Display Logs / Errors
     logsData = data.errors || [];
-    logsPre.textContent = logsData.join("\n");
+    if (logsPre) {
+        logsPre.textContent = logsData.join("\n");
+    }
 
     // Reveal the results section
-    resultsSection.classList.remove("d-none");
+    if (resultsSection) {
+        resultsSection.classList.remove("d-none");
+    }
 }
 
 // ====== Event Listeners for Forms ======
-uploadForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    console.log("Upload form submitted via JS.");
-    const formData = new FormData(uploadForm);
-    formData.append("csrfmiddlewaretoken", getCsrfToken());
-    handleFormSubmit(formData);
-});
+if (uploadForm) {
+    uploadForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log("Upload form submitted via JS.");
+        const formData = new FormData(uploadForm);
+        formData.append("csrfmiddlewaretoken", getCsrfToken());
+        handleFormSubmit(formData);
+    });
+}
 
-codeForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    console.log("Code form submitted via JS.");
-    const formData = new FormData();
-    const codeContent = codeEditor.getValue();
-    formData.append("ada_code", codeContent);
-    formData.append("csrfmiddlewaretoken", getCsrfToken());
-    handleFormSubmit(formData);
-});
+if (codeForm) {
+    codeForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        console.log("Code form submitted via JS.");
+        const formData = new FormData();
+        if (codeEditor) {
+            const codeContent = codeEditor.getValue();
+            formData.append("ada_code", codeContent);
+        } else {
+            console.error("CodeEditor not initialized");
+        }
+        formData.append("csrfmiddlewaretoken", getCsrfToken());
+        handleFormSubmit(formData);
+    });
+}
 
 // ====== File Drag & Drop Handling ======
 const dropZone = document.getElementById("drop-zone");
 const fileInput = document.getElementById("file-input");
 const filePreview = document.getElementById("file-preview");
 
-dropZone.addEventListener("click", () => fileInput.click());
+if (dropZone && fileInput) {
+    dropZone.addEventListener("click", () => fileInput.click());
 
-dropZone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.add("hover");
-});
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add("hover");
+    });
 
-dropZone.addEventListener("dragleave", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.remove("hover");
-});
+    dropZone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("hover");
+    });
 
-dropZone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropZone.classList.remove("hover");
-    if (e.dataTransfer.files.length) {
-    fileInput.files = e.dataTransfer.files;
-    previewFile(e.dataTransfer.files[0]);
-    }
-});
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("hover");
+        if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        previewFile(e.dataTransfer.files[0]);
+        }
+    });
+}
 
-fileInput.addEventListener("change", (e) => {
-    if (fileInput.files.length) {
-    previewFile(fileInput.files[0]);
-    }
-});
+if (fileInput) {
+    fileInput.addEventListener("change", (e) => {
+        if (fileInput.files.length) {
+        previewFile(fileInput.files[0]);
+        }
+    });
+}
 
 function previewFile(file) {
+    if (!filePreview) return;
+    
     filePreview.classList.add("d-none");
     filePreview.textContent = "";
     if (!file.name.endsWith(".ada")) {
@@ -160,7 +242,29 @@ function previewFile(file) {
 // ====== Utility Functions ======
 function getCsrfToken() {
     const csrfInput = document.querySelector("input[name='csrfmiddlewaretoken']");
-    return csrfInput ? csrfInput.value : "";
+    if (!csrfInput) {
+        console.error("CSRF token input not found in the document");
+        // Try to get from cookie as fallback
+        return getCsrfCookie();
+    }
+    return csrfInput.value;
+}
+
+function getCsrfCookie() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    console.log("CSRF cookie found:", !!cookieValue);
+    return cookieValue;
 }
 
 function copyText(elementId) {
@@ -185,32 +289,53 @@ function downloadFile(filename, content) {
 }
 
 // ====== Download Button Event Listeners ======
-downloadTokensBtn.addEventListener("click", () => {
-    const content = tokensData.map(([t, l]) => `${t}: ${l}`).join("\n");
-    downloadFile("tokens.txt", content);
-});
-downloadParseTreeBtn.addEventListener("click", () => {
-    downloadFile("parse_tree.txt", parseTreeData);
-});
-downloadLogsBtn.addEventListener("click", () => {
-    downloadFile("logs.txt", logsData.join("\n"));
-});
+if (downloadTokensBtn) {
+    downloadTokensBtn.addEventListener("click", () => {
+        const content = tokensData.map(([t, l]) => `${t}: ${l}`).join("\n");
+        downloadFile("tokens.txt", content);
+    });
+}
+
+if (downloadParseTreeBtn) {
+    downloadParseTreeBtn.addEventListener("click", () => {
+        downloadFile("parse_tree.txt", parseTreeData);
+    });
+}
+
+if (downloadLogsBtn) {
+    downloadLogsBtn.addEventListener("click", () => {
+        downloadFile("logs.txt", logsData.join("\n"));
+    });
+}
 
 // ====== Copy Button Event Listeners ======
-document.getElementById("copyTokensBtn").addEventListener("click", () => {
-    copyText("tokensTable");
-});
-document.getElementById("copyParseTreeBtn").addEventListener("click", () => {
-    copyText("parseTreeViz");
-});
-document.getElementById("copyLogsBtn").addEventListener("click", () => {
-    copyText("logs");
-});
+const copyTokensBtn = document.getElementById("copyTokensBtn");
+if (copyTokensBtn) {
+    copyTokensBtn.addEventListener("click", () => {
+        copyText("tokensTable");
+    });
+}
+
+const copyParseTreeBtn = document.getElementById("copyParseTreeBtn");
+if (copyParseTreeBtn) {
+    copyParseTreeBtn.addEventListener("click", () => {
+        copyText("parseTree");
+    });
+}
+
+const copyLogsBtn = document.getElementById("copyLogsBtn");
+if (copyLogsBtn) {
+    copyLogsBtn.addEventListener("click", () => {
+        copyText("logs");
+    });
+}
 
 // ====== Optional: Live Log Refresh (Demo) ======
 function updateLogs() {
-    const timestamp = new Date().toLocaleTimeString();
-    logsPre.textContent += `[${timestamp}] Live log update...\n`;
+    // This is a placeholder for potential future functionality
+    // console.log("Checking for log updates...");
 }
-setInterval(updateLogs, 5000);
+
+// Uncomment if you want to enable periodic log refreshing
+// setInterval(updateLogs, 5000);
 });
