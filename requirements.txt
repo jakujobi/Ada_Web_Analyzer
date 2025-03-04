@@ -23,8 +23,5 @@ djangorestframework>=3.14.0  # If using Django REST API
 django-cors-headers>=3.13.0  # CORS Handling
 django-compressor>=4.4  # Compresses static files
 
-# Optional: If Using D3.js for Visualization
-d3py>=0.2.1
-
 # Security and Performance Enhancements
 uvicorn>=0.24.0  # For ASGI apps (if needed)
