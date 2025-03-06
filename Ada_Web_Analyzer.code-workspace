@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../../JAKUJOBI/SDSU-Courses/CSC 446 - Compiler Construction/Ada_Compiler_Construction"
 		}
 	],
 	"settings": {}
