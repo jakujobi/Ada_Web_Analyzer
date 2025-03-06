@@ -110,6 +110,14 @@ async function handleFormSubmit(formData) {
     }
 }
 
+function updateProgressBar(percentComplete) {
+    const progressBar = document.getElementById("progress-bar");
+    if (progressBar) {
+        progressBar.style.width = percentComplete + "%";
+        progressBar.textContent = percentComplete.toFixed(0) + "%";
+    }
+}
+
 function displayResults(data) {
     console.log("Received data:", data);
 
@@ -156,8 +164,45 @@ if (uploadForm) {
         console.log("Upload form submitted via JS.");
         const formData = new FormData(uploadForm);
         formData.append("csrfmiddlewaretoken", getCsrfToken());
-        handleFormSubmit(formData);
+
+        resetProgressBar();
+
+        // Add progress listener
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = (event.loaded / event.total) * 100;
+                updateProgressBar(percentComplete);
+            }
+        });
+
+        xhr.open("POST", new URL('/process/', window.location.href).href);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.onload = async () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    displayResults(data);
+                } catch (error) {
+                    console.error("Error parsing JSON:", error);
+                    alert("Failed to parse server response. See console for details.");
+                }
+            } else {
+                console.error("Server returned error status:", xhr.status);
+                alert("An error occurred. Please try again. Status: " + xhr.status);
+            }
+        };
+        xhr.onerror = () => {
+            console.error("Request failed");
+            alert("Request failed. See console for details.");
+        };
+
+        xhr.send(formData);
     });
+}
+
+function resetProgressBar() {
+    updateProgressBar(0);
 }
 
 if (codeForm) {
