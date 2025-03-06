@@ -41,7 +41,7 @@ Ada is a structured, statically typed programming language that's used in missio
 
 - **Backend**: Django (Python web framework)
 - **Frontend**: HTML, CSS, JavaScript
-- **Libraries**: 
+- **Libraries**:
   - Bootstrap 5 (UI framework)
   - CodeMirror (code editor)
   - D3.js (visualization)
@@ -63,37 +63,37 @@ Before you begin, ensure you have the following installed:
 ### Setting Up Your Development Environment
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/jakujobi/Ada_Web_Analyzer.git
    cd Ada_Web_Analyzer
    ```
-
 2. **Create a virtual environment**:
+
    ```bash
    python -m venv venv
-   
+
    # On Windows
    venv\Scripts\activate
-   
+
    # On macOS/Linux
    source venv/bin/activate
    ```
-
 3. **Install dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
-
 4. **Apply database migrations**:
+
    ```bash
    python manage.py migrate
    ```
-
 5. **Run the development server**:
+
    ```bash
    python manage.py runserver
    ```
-
 6. **Access the application**:
    Open your browser and navigate to `http://127.0.0.1:8000/`
 
@@ -113,12 +113,12 @@ Ada_Web_Analyzer/
 │
 │── analysis/               # Main Django app
 │   ├── static/             # Static assets
-│   │   ├── analysis/       
+│   │   ├── analysis/     
 │   │   │   ├── css/        # CSS files
 │   │   │   ├── js/         # JavaScript files
 │   │   │   └── images/     # Image assets
 │   ├── templates/          # HTML templates
-│   │   └── analysis/       
+│   │   └── analysis/     
 │   │       ├── upload_code.html  # Main page template
 │   ├── views.py            # View functions
 │   ├── urls.py             # App-specific URL routing
@@ -161,7 +161,7 @@ The application has a simple, intuitive interface:
 When a user submits code:
 
 1. **Frontend**: JavaScript collects the code and sends it to the backend
-2. **Backend**: 
+2. **Backend**:
    - Code is tokenized by the lexical analyzer
    - Tokens are processed by the parser to build a parse tree
    - Results are returned as JSON
@@ -188,28 +188,27 @@ We follow a feature-branch workflow:
 ### Making Changes
 
 1. **Create a branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
-
 2. **Make your changes**
-
 3. **Test locally**:
+
    ```bash
    python manage.py runserver
    ```
-
 4. **Commit your changes**:
+
    ```bash
    git add .
    git commit -m "Add descriptive message about your changes"
    ```
-
 5. **Push to GitHub**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
-
 6. **Create a pull request** for review
 
 ### Code Style

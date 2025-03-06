@@ -33,6 +33,43 @@ console.log("Download parse tree button found:", !!downloadParseTreeBtn);
 const downloadLogsBtn = document.getElementById("downloadLogsBtn");
 console.log("Download logs button found:", !!downloadLogsBtn);
 
+// Progress and logging functionality
+const progressSection = document.getElementById("progressSection");
+const progressBar = document.getElementById("progressBar");
+const processingStatus = document.getElementById("processingStatus");
+const systemLogs = document.getElementById("systemLogs");
+const showSystemLogsSwitch = document.getElementById("showSystemLogsSwitch");
+const systemLogsContainer = document.getElementById("systemLogsContainer");
+
+// Initialize progress tracking
+function initializeProgress() {
+    progressSection.classList.remove("d-none");
+    updateProgress(0, "Starting analysis...");
+    systemLogs.textContent = "";
+}
+
+// Update progress bar and status
+function updateProgress(percent, status) {
+    progressBar.style.width = `${percent}%`;
+    progressBar.setAttribute("aria-valuenow", percent);
+    progressBar.textContent = `${percent}%`;
+    processingStatus.textContent = status;
+}
+
+// Add log entry
+function addLogEntry(message) {
+    const timestamp = new Date().toLocaleTimeString();
+    systemLogs.textContent += `[${timestamp}] ${message}\n`;
+    systemLogs.scrollTop = systemLogs.scrollHeight;
+}
+
+// Toggle system logs visibility
+if (showSystemLogsSwitch) {
+    showSystemLogsSwitch.addEventListener("change", (e) => {
+        systemLogsContainer.classList.toggle("d-none", !e.target.checked);
+    });
+}
+
 // Global variables for results
 let tokensData = [];
 let parseTreeData = "";
@@ -60,53 +97,70 @@ try {
 // ====== AJAX Submission Functions ======
 async function handleFormSubmit(formData) {
     try {
-    console.log("Submitting form data...");
-    // Log the form data for debugging (excluding file contents for brevity)
-    for (let pair of formData.entries()) {
-        if (pair[0] !== 'ada_file' && pair[0] !== 'ada_code') {
-            console.log(pair[0] + ': ' + pair[1]);
-        } else {
-            console.log(pair[0] + ': [content not shown]');
+        initializeProgress();
+        addLogEntry("Starting file processing...");
+        
+        updateProgress(20, "Uploading file...");
+        addLogEntry("Uploading file to server...");
+
+        console.log("Submitting form data...");
+        // Log the form data for debugging (excluding file contents for brevity)
+        for (let pair of formData.entries()) {
+            if (pair[0] !== 'ada_file' && pair[0] !== 'ada_code') {
+                console.log(pair[0] + ': ' + pair[1]);
+            } else {
+                console.log(pair[0] + ': [content not shown]');
+            }
         }
-    }
-    
-    // Get the absolute URL for the process endpoint
-    const processUrl = new URL('/process/', window.location.href).href;
-    console.log("Submitting to URL:", processUrl);
-    
-    const response = await fetch(processUrl, {
-        method: "POST",
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+        
+        // Get the absolute URL for the process endpoint
+        const processUrl = new URL('/process/', window.location.href).href;
+        console.log("Submitting to URL:", processUrl);
+        
+        const response = await fetch(processUrl, {
+            method: "POST",
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        console.log("Response status:", response.status);
+        
+        if (!response.ok) {
+            console.error("Server returned error status:", response.status);
+            alert("An error occurred. Please try again. Status: " + response.status);
+            return;
         }
-    });
-    
-    console.log("Response status:", response.status);
-    
-    if (!response.ok) {
-        console.error("Server returned error status:", response.status);
-        alert("An error occurred. Please try again. Status: " + response.status);
-        return;
-    }
-    
-    const contentType = response.headers.get('content-type');
-    console.log("Response content type:", contentType);
-    
-    if (!contentType || !contentType.includes('application/json')) {
-        console.error("Unexpected content type:", contentType);
-        const text = await response.text();
-        console.log("Response text (first 500 chars):", text.substring(0, 500));
-        alert("Server returned an unexpected response format. See console for details.");
-        return;
-    }
-    
-    const data = await response.json();
-    console.log("Received data:", data);
-    displayResults(data);
+        
+        const contentType = response.headers.get('content-type');
+        console.log("Response content type:", contentType);
+        
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error("Unexpected content type:", contentType);
+            const text = await response.text();
+            console.log("Response text (first 500 chars):", text.substring(0, 500));
+            alert("Server returned an unexpected response format. See console for details.");
+            return;
+        }
+
+        updateProgress(50, "Processing file...");
+        addLogEntry("File uploaded, processing content...");
+        
+        const data = await response.json();
+        
+        updateProgress(80, "Generating results...");
+        addLogEntry("Analysis complete, preparing display...");
+
+        displayResults(data);
+        
+        updateProgress(100, "Analysis complete!");
+        addLogEntry("Results displayed successfully.");
     } catch (error) {
-    console.error("AJAX request failed:", error);
-    alert("Request failed: " + error.message + ". See console for details.");
+        updateProgress(0, "Error occurred!");
+        addLogEntry(`Error: ${error.message}`);
+        console.error("AJAX request failed:", error);
+        alert("Request failed: " + error.message + ". See console for details.");
     }
 }
 

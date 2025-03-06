@@ -7,6 +7,7 @@ from Modules.RDParser import RDParser
 from Modules.Definitions import Definitions
 import logging
 import traceback
+import time
 
 # Set up logging
 logger = logging.getLogger(__name__)
