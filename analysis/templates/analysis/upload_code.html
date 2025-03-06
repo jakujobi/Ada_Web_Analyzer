@@ -69,60 +69,169 @@
             border: 1px solid #0087F7;
             background-color: #E8F0FE;
         }
+
+        /* Enhanced UI styles */
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            border: none;
+            border-radius: 0.5rem;
+        }
+        
+        .card-header {
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .btn {
+            border-radius: 0.4rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        #progressSection {
+            transition: opacity 0.3s ease;
+        }
+        
+        .tab-content {
+            border-radius: 0 0 .25rem .25rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            #drop-zone {
+                padding: 25px;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+        /* Sticky progress bar */
+        #progressSection {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            margin: -1rem -15px 1rem -15px;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Enhanced table styles */
+        #tokensTable {
+            border-radius: .25rem;
+            overflow: hidden;
+        }
+
+        #tokensTable thead {
+            background-color: #f8f9fa;
+        }
+
+        /* Better visibility for system logs */
+        #systemLogs {
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            padding: 1rem;
+            border-radius: .25rem;
+        }
+
+        /* Sticky header with reload button */
+        .page-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .reload-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background: #0087F7;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .reload-btn:hover {
+            transform: rotate(180deg);
+            background: #005bb5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .reload-btn {
+                bottom: 1rem;
+                right: 1rem;
+                width: 3rem;
+                height: 3rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #0087F7;">
-        <div class="container">
-            <a class="navbar-brand" href="#">Ada Web Analyzer</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+    <!-- Add floating reload button after navbar -->
+    <button class="reload-btn" onclick="location.reload()" title="Reset Application">
+        <i class="bi bi-arrow-clockwise"></i>
+    </button>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <h1>Ada Web Analyzer</h1>
+            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                About
             </button>
-            <div id="navbarNav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container py-4">
-        <h1 class="mb-4 text-center">Ada Web Analyzer</h1>
-
-        <!-- Usage Instructions -->
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">How to Use</h5>
-                <p class="card-text">
-                    Drag and drop your <code>.ada</code> file or paste your Ada source code below.
-                    The analyzer will tokenize your file, build a parse tree, and display logs/errors.
-                    Use the Copy and Download buttons to save or share the results.
-                </p>
-            </div>
         </div>
 
-        <!-- Project & Creator Info Card -->
-        <div class="card">
-            <div class="card-header" style="background-color: #005bb5; color: #fff;">Project &amp; Creator Info</div>
-            <div class="card-body">
-                <p><strong>Project Version:</strong> 1.0</p>
-                <p>
-                    This project started as part of the Ada Compiler Construction effort.
-                    See the original project on GitHub:
-                    <a href="https://github.com/jakujobi/Ada_Compiler_Construction" target="_blank">Ada_Compiler_Construction</a>
-                </p>
-                <hr>
-                <p><strong>Creator:</strong> John Akujobi</p>
-                <p>
-                    Aspiring Software Engineer with a passion for AI/ML applications.
-                    Check out my GitHub:
-                    <a href="https://github.com/jakujobi" target="_blank">jakujobi</a>
-                    and visit my website:
-                    <a href="https://jakujobi.com" target="_blank">jakujobi.com</a>
-                </p>
+        <!-- Introduction Section -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <p>
+                            Aspiring Software Engineer with a passion for AI/ML applications.
+                            Check out my GitHub:
+                            <a href="https://github.com/jakujobi" target="_blank">jakujobi</a>
+                            and visit my website:
+                            <a href="https://jakujobi.com" target="_blank">jakujobi.com</a>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -167,12 +276,14 @@
 
         <!-- Progress Bar Section -->
         <div id="progressSection" class="d-none mb-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Processing Status</span>
-                    <button id="reloadAppBtn" class="btn btn-sm btn-outline-primary">Reload Application</button>
-                </div>
-                <div class="card-body">
+            <div class="card border-0">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Processing Status</h5>
+                        <button id="reloadAppBtn" class="btn btn-outline-primary" onclick="location.reload()">
+                            <i class="bi bi-arrow-clockwise"></i> Reset Application
+                        </button>
+                    </div>
                     <div class="progress mb-3">
                         <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                     </div>
@@ -290,5 +401,7 @@
           e.preventDefault();
       });
     </script>
+    <!-- Add Bootstrap Icons CDN before closing body tag -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 </body>
 </html>

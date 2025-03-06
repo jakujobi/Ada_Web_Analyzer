@@ -437,4 +437,24 @@ function updateLogs() {
 
 // Uncomment if you want to enable periodic log refreshing
 // setInterval(updateLogs, 5000);
+
+// Add reload confirmation
+document.querySelector('.reload-btn').addEventListener('click', (e) => {
+    if (document.getElementById('resultsSection').classList.contains('show')) {
+        if (!confirm('This will clear all current results. Continue?')) {
+            e.preventDefault();
+        }
+    }
+});
+
+// Add smooth transitions for UI elements
+document.querySelectorAll('.card, .btn').forEach(element => {
+    element.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+    });
+    
+    element.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
 });
